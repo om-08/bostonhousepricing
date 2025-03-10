@@ -18,18 +18,38 @@ def home():
 @app.route('/predict_api',methods = ['POST'])
 
 def predict_api():
-    data = request.json['data'] # Once predict_api is hit the data will get stored in the form of json in the data variable
-    print(data)
-    print(np.array(list(data.values())).reshape(1,-1)) # This will save the data's value in the form of list of every feature  # Note that we would want to reshape the 2 d to one d array also # by adding the list keyword we change tfrom dict obj to list type data
-    # Applying Standarad Scaler
-    
-    new_data = scalar.transform(np.array(list(data.values())).reshape(1,-1))  # Fit_transform only for the new data
-    
-    # Now Prediciting
+    data = request.json['data']
+    print(data) 
+    print(np.array(list(data.values())).reshape(1,-1))
+    new_data = scalar.transform(np.array(list(data.values())).reshape(1,-1))
     output = regmodel.predict(new_data)
-    
-    print(output[0]) # Since Output will be in two-dimensional 
+    print(output[0])
     return jsonify(output[0])
+
+
+@app.route('/predict',methods = ['POST'])
+def predict():
+    data = [float(x) for x in  request.form.values()] # From Html form
+    final_input = scalar.transform(np.array(data).reshape(1,-1)) # Standardize into one d array
+    print(final_input)
+    
+    
+    # Prediciting the model
+    output = regmodel.predict(final_input)[0] # As it is in array we need to get the result so we use indexing important step
+    
+    return render_template('home.html',prediction_text = f'The Predicited House Price is {output}')      # This Predciiton text is in the html file    # The result will get showed in the h
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True) 
